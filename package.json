@@ -3,7 +3,7 @@
   "module": "src/index.tsx",
   "type": "module",
   "scripts": {
-    "start": "bun run src/index.tsx",
+    "start": "bun --revision && bun --smol run src/index.tsx",
     "dev": "bun run --watch src/index.tsx"
   },
   "devDependencies": {
