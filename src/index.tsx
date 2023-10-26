@@ -7,6 +7,7 @@ import { NotFound } from './components/not-found';
 import { rm as deleteFile, writeFile } from 'fs/promises';
 import { temporaryFile } from 'tempy';
 import { getCommitHash } from './get-commit-hash';
+import semver from 'semver';
 
 const ButtonRow: React.FC<PropsWithChildren> = ({ children }) => <div className="flex flex-row gap-2">{children}</div>;
 
