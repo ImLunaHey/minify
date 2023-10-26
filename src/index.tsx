@@ -6,6 +6,7 @@ import { Text } from './components/text';
 import { NotFound } from './components/not-found';
 import { rm as deleteFile, writeFile } from 'fs/promises';
 import { temporaryFile } from 'tempy';
+import { getCommitHash } from './get-commit-hash';
 
 const ButtonRow: React.FC<PropsWithChildren> = ({ children }) => <div className="flex flex-row gap-2">{children}</div>;
 
@@ -124,11 +125,40 @@ const App: React.FC<PropsWithChildren> = ({ children }) => (
   </html>
 );
 
+// Get the version of the current application
+const version = await import(`${process.cwd()}/package.json`)
+  .then((pkg) => semver.parse(pkg.version)?.major)
+  .catch(() => 'unknown');
+const releaseId = await import(`${process.cwd()}/package.json`)
+  .then((pkg) => `${pkg.version}+${getCommitHash(process.cwd())}`)
+  .catch(() => 'unknown');
+
 const server = Bun.serve({
   port: process.env.PORT ?? 3000,
   async fetch(request) {
     const url = new URL(request.url);
     const path = url.pathname;
+
+    if (path === '/.well-known/health') {
+      const fields = {
+        version,
+        releaseId,
+        time: new Date().toISOString(),
+      };
+      return new Response(
+        JSON.stringify({
+          ...fields,
+          status: 'pass',
+        }),
+        {
+          status: 200,
+          headers: {
+            'content-type': 'application/health+json',
+          },
+        },
+      );
+    }
+
     if (path === '/')
       return new Response(
         renderToStaticMarkup(
